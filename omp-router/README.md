@@ -24,6 +24,10 @@ Then in omp:
 /router-model                           # browse/select a router model
 ```
 
+A URL without the `/v1` suffix is fine (e.g. `https://yardmaster.bacnh.com`) —
+it is normalized to `<url>/v1` when the provider registers, so chat, model
+discovery, and usage all target the same OpenAI-compatible base.
+
 The provider id is `router`; models show up as `router/<router-model-id>`.
 Models are discovered from `GET <baseUrl>/models` with a 24 h host-side cache
 (`omp models refresh` forces a pull).

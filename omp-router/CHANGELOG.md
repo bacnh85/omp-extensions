@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.2 — 2026-09-27
+
+Bugfix.
+
+- **Sessions fail with "Assistant returned empty stop after retry cap"** when
+  the stored router URL omits `/v1` (e.g. `https://yardmaster.bacnh.com`).
+  Discovery worked (the extension injects `/v1` for `/models` itself), but
+  omp's chat transport posts to `{baseUrl}/chat/completions` verbatim — the
+  router's web SPA answered `200 text/html` with zero SSE events, and omp
+  retried an empty assistant three times before failing. The provider and
+  usage base URLs are now normalized (`withV1`) at registration, so chat,
+  discovery, and usage share one `/v1`-suffixed base. Verified live against
+  the real router: `router/zai/glm-5.3-flash` streams normally.
+
 ## 0.1.1 — 2026-09-27
 
 Bugfix.

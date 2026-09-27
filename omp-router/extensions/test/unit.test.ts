@@ -16,7 +16,7 @@ import {
   createUsageProvider,
   setUpstreamResolver,
 } from "../lib/usage.js";
-import { registerRouterProvider } from "../lib/provider.js";
+import { registerRouterProvider, withV1 } from "../lib/provider.js";
 
 // ── Isolation ────────────────────────────────────────────────────────────────
 // Point PI_CODING_AGENT_DIR at a temp dir so tests never touch the user's live
@@ -614,5 +614,22 @@ describe("provider registration", () => {
     } finally {
       globalThis.fetch = realFetch;
     }
+  });
+
+  it("normalizes /v1 into provider baseUrl (chat must not hit the SPA)", () => {
+    // Regression: a stored URL without /v1 (e.g. https://yardmaster.bacnh.com)
+    // discovered models via fetchModels' own injection but omp's chat
+    // transport posts to `{baseUrl}/chat/completions` verbatim → router's web
+    // SPA answered 200 HTML → "empty stop" retry loop. The registered
+    // provider base must be the normalized /v1-suffixed URL.
+    assert.equal(withV1("https://yardmaster.bacnh.com"), "https://yardmaster.bacnh.com/v1");
+    assert.equal(withV1("https://yardmaster.bacnh.com/"), "https://yardmaster.bacnh.com/v1");
+    assert.equal(withV1("http://h:20128/v1"), "http://h:20128/v1");
+    assert.equal(withV1("https://gw.corp/api/router/"), "https://gw.corp/api/router/v1");
+
+    writeFileSync(join(TMP_HOME, "router.json"), JSON.stringify({ baseUrl: "https://yardmaster.bacnh.com" }));
+    const { pi, holder } = fakePi();
+    registerRouterProvider(pi, getSettings());
+    assert.equal(holder.captured!.config.baseUrl, "https://yardmaster.bacnh.com/v1");
   });
 });

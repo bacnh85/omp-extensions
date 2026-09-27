@@ -4,6 +4,18 @@ import { PROVIDER_ID } from "./config.js";
 import { fetchModels, mapModel } from "./client.js";
 import { createUsageProvider } from "./usage.js";
 
+/** omp's chat transport posts to `{baseUrl}/chat/completions` verbatim, while
+ *  discovery (`fetchModels`) injects `/v1` when the configured URL omits it.
+ *  A URL stored without `/v1` (e.g. `https://yardmaster.bacnh.com`) therefore
+ *  discovers models fine but chats into the router's web SPA — 200 HTML, zero
+ *  SSE events, and omp retries an "empty stop" until it gives up. Normalize
+ *  once here so chat, discovery, and usage share the same `/v1`-suffixed
+ *  base. Idempotent for URLs that already carry it. */
+export function withV1(baseUrl: string): string {
+  const trimmed = baseUrl.replace(/\/+$/, "");
+  return /\/v1$/.test(trimmed) ? trimmed : `${trimmed}/v1`;
+}
+
 /** Register (or replace) the router provider:
  *
  *  - Models: `fetchDynamicModels` pulls `GET /v1/models` and maps each entry
@@ -18,8 +30,9 @@ import { createUsageProvider } from "./usage.js";
  *    (5-min TTL + last-good retention), records history, and renders it in
  *    its usage surfaces like any built-in provider. */
 export function registerRouterProvider(pi: ExtensionAPI, settings: RouterSettings): void {
+  const baseUrl = withV1(settings.baseUrl);
   pi.registerProvider(PROVIDER_ID, {
-    baseUrl: settings.baseUrl,
+    baseUrl,
     // NOTE: do NOT set `apiKey` here. It acts as a models.yml-style config
     // override (resolution layer 2) and would shadow the stored `/login
     // router` credential (layers 3/4) — a literal/env-name string went out
@@ -29,7 +42,7 @@ export function registerRouterProvider(pi: ExtensionAPI, settings: RouterSetting
     api: "openai-completions",
     authHeader: true,
     fetchDynamicModels: async (apiKey) => {
-      const raw = await fetchModels(settings, undefined, apiKey);
+      const raw = await fetchModels({ ...settings, baseUrl }, undefined, apiKey);
       return raw.map((m) => mapModel(m, settings.enableReasoning));
     },
     oauth: {
@@ -45,6 +58,6 @@ export function registerRouterProvider(pi: ExtensionAPI, settings: RouterSetting
         return trimmed;
       },
     },
-    usage: createUsageProvider(settings),
+    usage: createUsageProvider({ ...settings, baseUrl }),
   } satisfies ProviderConfig);
 }

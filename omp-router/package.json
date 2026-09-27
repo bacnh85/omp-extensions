@@ -1,6 +1,6 @@
 {
   "name": "@bacnh85/omp-router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OhMyPi extension connecting to any OpenAI-compatible AI router (9router, OmniRoute, yardmaster, …) via its /v1 API, with upstream-provider usage reporting.",
   "type": "module",
   "license": "MIT",

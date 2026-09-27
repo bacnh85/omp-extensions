@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.1 — 2026-09-27
+
+Bugfix.
+
+- **No models in fresh sessions** — the provider registration passed
+  `apiKey: "ROUTER_API_KEY"`, believing it an env fallback. omp treats it as a
+  models.yml-style config override (resolution layer 2), which shadows the
+  stored `/login router` credential (layers 3/4): requests and discovery went
+  out signed with the literal string `Bearer ROUTER_API_KEY`, discovery 401'd,
+  and no models loaded. The field is now omitted entirely; the stored login
+  credential resolves normally.
+- Env-only setups: extension providers have no catalog entry, so omp's
+  layer-5 env mapping never applies to `router` — models were discovered but
+  stayed unselectable. At session start, when no credential resolves and an
+  env key is set, the extension registers it as an in-session config override
+  (self-healing: a stored `/login` credential always wins once it exists).
+
 ## 0.1.0 — 2026-09-27
 
 Initial release.

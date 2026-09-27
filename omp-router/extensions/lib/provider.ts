@@ -20,10 +20,12 @@ import { createUsageProvider } from "./usage.js";
 export function registerRouterProvider(pi: ExtensionAPI, settings: RouterSettings): void {
   pi.registerProvider(PROVIDER_ID, {
     baseUrl: settings.baseUrl,
-    // Env-name fallback; the /login-stored credential wins (host resolution
-    // order). Without either, discovery runs keyless and only picks up
-    // models the router exposes anonymously.
-    apiKey: "ROUTER_API_KEY",
+    // NOTE: do NOT set `apiKey` here. It acts as a models.yml-style config
+    // override (resolution layer 2) and would shadow the stored `/login
+    // router` credential (layers 3/4) — a literal/env-name string went out
+    // as `Authorization: Bearer ROUTER_API_KEY` and broke auth entirely.
+    // With it omitted, the host resolves the stored login credential, then
+    // the ROUTER_API_KEY env var (verified empirically; see README).
     api: "openai-completions",
     authHeader: true,
     fetchDynamicModels: async (apiKey) => {

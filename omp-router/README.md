@@ -39,8 +39,16 @@ Precedence: env > project (trusted repos only) > global.
 | Global | `~/.omp/agent/router.json` | `baseUrl`, `enableReasoning` (written by `/router-url` / `/router-reasoning`) |
 
 The API key is **not** stored in these files: use `/login router` (or
-`omp login router`), which stores it in omp's own credential store; the
-`ROUTER_API_KEY` env var is the fallback.
+`omp login router`), which stores it in omp's own credential store.
+
+`ROUTER_API_KEY` / `OMP_ROUTER_API_KEY` env vars work as a fallback: discovery
+sends them directly, and at session start the extension registers the env
+value as an in-session auth override **only when no credential resolves at
+all** — so a later `/login router` always wins from the next session on. Do
+NOT pin the key under `providers.router.apiKey` in `models.yml`: that override
+shadows the stored `/login` credential (omp's config layer beats stored
+credentials), which manifests as requests signed with the literal config
+string and, ultimately, no loadable models.
 
 ## Commands
 

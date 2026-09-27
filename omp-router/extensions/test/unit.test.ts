@@ -576,7 +576,10 @@ describe("provider registration", () => {
     const cfg = captured.config;
     assert.equal(cfg.baseUrl, "http://h:20128/v1");
     assert.equal(cfg.api, "openai-completions");
-    assert.equal(cfg.apiKey, "ROUTER_API_KEY");
+    // Regression (fresh-session no-models bug): the field acts as a config
+    // override that shadows the stored /login credential — it must stay
+    // unset so the host resolves stored credential → env normally.
+    assert.equal(cfg.apiKey, undefined);
     assert.equal(typeof cfg.fetchDynamicModels, "function");
     assert.ok(cfg.oauth && typeof (cfg.oauth as { login: unknown }).login === "function");
     assert.ok(cfg.usage && typeof (cfg.usage as { fetchUsage: unknown }).fetchUsage === "function");

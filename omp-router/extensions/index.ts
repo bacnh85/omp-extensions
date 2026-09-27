@@ -301,6 +301,22 @@ export default function (pi: ExtensionAPI) {
       registeredBaseUrl = s.baseUrl;
       registerRouterProvider(pi, s);
     }
+    // Env-key availability bridge. Extension providers have no catalog entry,
+    // so omp's layer-5 env mapping (`envVars`) never applies to "router": an
+    // env-only key discovers models (client env fallback) but leaves them
+    // unselectable (no resolvable auth). When NOTHING else resolves, register
+    // the env value as a config-sourced override — in-memory, so a later
+    // `/login router` wins from the next session on (bridge only applies
+    // when nothing resolves). Never passes an env NAME: unset env must stay
+    // unset, not leak the literal (the original no-models bug).
+    let resolvedKey: string | undefined;
+    try {
+      resolvedKey = await ctx.modelRegistry.getApiKeyForProvider(PROVIDER_ID);
+    } catch { /* resolution errors → treat as unauthenticated */ }
+    if (!resolvedKey) {
+      const envKey = process.env.OMP_ROUTER_API_KEY ?? process.env.ROUTER_API_KEY;
+      if (envKey) ctx.modelRegistry.authStorage.keys.setConfig(PROVIDER_ID, envKey);
+    }
     await refreshActiveModel(pi, ctx);
   });
 

@@ -1,0 +1,19 @@
+{
+  "name": "omp-extensions",
+  "private": true,
+  "description": "OhMyPi (omp) extension packages — kept separate from pi-extensions because the host APIs are not compatible.",
+  "type": "module",
+  "license": "MIT",
+  "workspaces": [
+    "omp-router"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
+  }
+}

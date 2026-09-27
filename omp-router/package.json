@@ -1,0 +1,60 @@
+{
+  "name": "@bacnh85/omp-router",
+  "version": "0.1.0",
+  "description": "OhMyPi extension connecting to any OpenAI-compatible AI router (9router, OmniRoute, yardmaster, …) via its /v1 API, with upstream-provider usage reporting.",
+  "type": "module",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/bacnh85/omp-extensions/tree/main/omp-router",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bacnh85/omp-extensions.git",
+    "directory": "omp-router"
+  },
+  "bugs": {
+    "url": "https://github.com/bacnh85/omp-extensions/issues"
+  },
+  "keywords": [
+    "omp",
+    "ohmypilot",
+    "omp-extension",
+    "router",
+    "9router",
+    "omniroute",
+    "ai-router",
+    "openai-proxy",
+    "api-gateway",
+    "usage"
+  ],
+  "scripts": {
+    "test": "node --import tsx --test extensions/test/unit.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "files": [
+    "README.md",
+    "CHANGELOG.md",
+    "extensions/index.ts",
+    "extensions/package.json",
+    "extensions/lib/",
+    "LICENSE"
+  ],
+  "omp": {
+    "extensions": [
+      "./extensions/index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@oh-my-pi/pi-catalog": "*",
+    "@oh-my-pi/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@oh-my-pi/pi-ai": "18.3.5",
+    "@oh-my-pi/pi-catalog": "18.3.5",
+    "@oh-my-pi/pi-coding-agent": "18.3.5",
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
+  }
+}

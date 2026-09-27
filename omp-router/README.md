@@ -8,6 +8,31 @@ quotas as seen through the router.
 Ported from `pi-router` + the pi-sub router adapter; the omp-native provider,
 discovery, login, and usage seams replace pi's hand-rolled machinery.
 
+## Install
+
+From npm (published automatically on `v*` tags):
+
+```bash
+npm install -g @bacnh85/omp-router
+```
+
+Then load the installed package path in `~/.omp/agent/config.yml` — run
+`npm root -g` to locate your global `node_modules` and point at the package:
+
+```yaml
+# ~/.omp/agent/config.yml
+extensions:
+  - /usr/local/lib/node_modules/@bacnh85/omp-router   # $(npm root -g)/@bacnh85/omp-router
+```
+
+Or point the config at a checkout for development:
+
+```yaml
+# ~/.omp/agent/config.yml
+extensions:
+  - ~/code/omp-extensions/omp-router
+```
+
 ## Quick start
 
 ```yaml

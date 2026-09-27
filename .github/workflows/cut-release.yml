@@ -1,0 +1,45 @@
+name: cut-release
+# Manual release frontend: bump @bacnh85/omp-router, commit, tag, push.
+# The v* tag then triggers release.yml (tests → npm publish).
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Semver bump: patch | minor | major | explicit x.y.z"
+        required: true
+        default: "patch"
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify current tree passes tests
+        run: |
+          npm install
+          npm run typecheck --workspaces --if-present
+          npm test --workspaces --if-present
+      - name: Guard against uncommitted upstream state
+        run: git diff --exit-code
+      - name: Bump version
+        id: bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          NEW="$(npm version "${{ inputs.bump }}" -w omp-router --no-git-tag-version | tail -n1)"
+          npm install --package-lock-only
+          git add -A
+          git diff --cached --exit-code || git commit -m "release ${NEW}"
+          echo "version=${NEW#v}" >> "$GITHUB_OUTPUT"
+      - name: Push commit + v-tag (triggers release.yml)
+        run: |
+          git tag "v${{ steps.bump.outputs.version }}"
+          git push origin "HEAD:${{ github.ref_name }}" "v${{ steps.bump.outputs.version }}"
